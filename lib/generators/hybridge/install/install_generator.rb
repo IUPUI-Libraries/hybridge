@@ -14,6 +14,11 @@ class Hybridge::InstallGenerator < Rails::Generators::Base
         "    <span class=\"fa fa-magic\"></span> <span class=\"sidebar-action-text\"><%= t('hybridge.admin.sidebar.ingest') %></span>\n" \
         "  <% end %>\n"
       end
+    else
+      hyrax_path = Bundler.rubygems.find_name('hyrax').first.full_gem_path
+      sidebar_path = hyrax_path + '/app/views/hyrax/dahsboard/_sidebar.html.erb'
+      dest_folder = 'app/views/hyrax/dashboard/'
+      FileUtils.cp(sidebar_path, dest_folder)
     end
   end
 
