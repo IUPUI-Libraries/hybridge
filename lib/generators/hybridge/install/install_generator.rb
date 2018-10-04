@@ -6,19 +6,28 @@ class Hybridge::InstallGenerator < Rails::Generators::Base
   end
 
   def inject_dashboard_link
-    file_path = "app/views/hyrax/dashboard/_sidebar.html.erb"
+    file_path = 'app/views/hyrax/dashboard/_sidebar.html.erb'
+    hyrax_path = Bundler.rubygems.find_name('hyrax').first.full_gem_path
+    menu_path = hyrax_path + '/app/views/hyrax/dashboard/sidebar/_repository_content.html.erb'
     if File.file?(file_path)
-      insert_into_file file_path, after: /menu\.nav_link\(hyrax\.my_works_path.*?<% end %>/m do
-        "\n\n  <%= menu.nav_link(hybridge.root_path,\n" \
-        "                        also_active_for: hyrax.dashboard_works_path) do %>\n" \
-        "    <span class=\"fa fa-magic\"></span> <span class=\"sidebar-action-text\"><%= t('hybridge.admin.sidebar.ingest') %></span>\n" \
-        "  <% end %>\n"
-      end
-    else
-      hyrax_path = Bundler.rubygems.find_name('hyrax').first.full_gem_path
-      sidebar_path = hyrax_path + '/app/views/hyrax/dashboard/_sidebar.html.erb'
-      dest_folder = 'app/views/hyrax/dashboard/'
-      FileUtils.cp(sidebar_path, dest_folder)
+      add_link(file_path)
+    elsif File.file? menu_path
+      dest_path = 'app/views/hyrax/dashboard/sidebar'
+      dest_file = dest_path + '/_repository_content.html.erb'
+      FileUtils.mkdir_p(dest_path)
+      FileUtils.cp menu_path, dest_file
+      add_link(dest_file)
+    end
+  end
+
+  private
+
+  def add_link(file_path)
+    insert_into_file file_path, after: /menu\.nav_link\(hyrax\.my_works_path.*?<% end %>/m do
+      "\n\n  <%= menu.nav_link(hybridge.root_path,\n" \
+      "                        also_active_for: hyrax.dashboard_works_path) do %>\n" \
+      "    <span class=\"fa fa-magic\"></span> <span class=\"sidebar-action-text\"><%= t('hybridge.admin.sidebar.ingest') %></span>\n" \
+      "  <% end %>\n"
     end
   end
 
